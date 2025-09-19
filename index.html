@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DineEase - Restaurant Reservation System</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        #hero-section { background-color: #2C1310; }
+        #hero-video { position: absolute; top: 50%; left: 50%; width: 100%; height: 100%; object-fit: cover; transform: translate(-50%, -50%); z-index: 1; }
+        .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top, rgba(44,19,16,0.8), rgba(44,19,16,0.2)); z-index: 2; }
+        #hero-section > div { z-index: 3; }
+        header.scrolled { background-color: #fdf8f0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+        header.scrolled #header-title, header.scrolled #myReservationsBtn, header.scrolled .auth-btn { color: #2C1310; }
+        header.scrolled #home-logo svg { color: #932C04 !important; }
+        .inspiration-slider-container { scroll-behavior: smooth; }
+        .inspiration-slider-container::-webkit-scrollbar { display: none; }
+        .inspiration-slider-container { -ms-overflow-style: none; scrollbar-width: none; }
+        .inspiration-item { transition: transform 0.3s ease; }
+        .inspiration-item:hover { transform: scale(1.08); }
+        .inspiration-item img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        @media (min-width: 768px) { .inspiration-item img { width: 120px; height: 120px; } }
+        .slider-arrow { background-color: white; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: transform 0.2s; }
+        .slider-arrow:hover { transform: scale(1.1); }
+        .slider-arrow:disabled { opacity: 0.3; cursor: not-allowed; }
+        .detail-image-slider { position: relative; overflow: hidden; }
+        .detail-image-wrapper { display: flex; transition: transform 0.5s ease-in-out; }
+        .detail-image-wrapper img { flex-shrink: 0; width: 100%; height: 400px; object-fit: cover; }
+        .detail-slider-arrow { position: absolute; top: 50%; transform: translateY(-50%); background-color: rgba(255, 255, 255, 0.8); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color 0.2s; }
+        .detail-slider-arrow:hover { background-color: white; }
+        .detail-slider-arrow.left { left: 16px; }
+        .detail-slider-arrow.right { right: 16px; }
+        .modal-bg { background-color: rgba(44, 19, 16, 0.7); backdrop-filter: blur(4px); }
+        .time-slot.selected { background-color: #932C04; color: #E1C99E; border-color: #932C04; }
+        .detail-tab { cursor: pointer; padding-bottom: 0.75rem; border-bottom: 3px solid transparent; transition: all 0.3s; }
+        .detail-tab.active { color: #C4751C; border-bottom-color: #C4751C; }
+        .gradient-btn { background-image: linear-gradient(to right, #C4751C, #932C04); }
+        .gradient-btn:hover { opacity: 0.9; }
+        .gradient-btn:disabled { opacity: 0.5; cursor: not-allowed; background-image: linear-gradient(to right, #989382, #6b685e); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #E1C99E; }
+        ::-webkit-scrollbar-thumb { background: #989382; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #932C04; }
+    </style>
+</head>
+<body class="bg-[#fdf8f0] text-[#2C1310]">
+
+    <!-- Header -->
+    <header id="header" class="sticky top-0 bg-transparent z-30 transition-all duration-300">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2 cursor-pointer" id="home-logo">
+                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-white transition-colors duration-300"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67V7Z" fill="currentColor"/></svg>
+                <h1 class="text-2xl font-bold text-white transition-colors duration-300" id="header-title">DineEase</h1>
+            </div>
+            <div id="auth-container" class="flex items-center space-x-4">
+                <button id="myReservationsBtn" class="auth-btn flex items-center space-x-2 text-white hover:text-[#E1C99E] transition-colors duration-300"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg><span class="hidden md:inline">My Reservations</span></button>
+                <button id="login-btn" class="auth-btn font-semibold text-white hover:text-[#E1C99E] transition-colors duration-300 hidden md:inline-block">Log in</button>
+                <button id="signup-btn" class="auth-btn font-semibold text-white hover:text-[#E1C99E] transition-colors duration-300 hidden md:inline-block">Sign up</button>
+                <img src="https://placehold.co/40x40/E1C99E/2C1310?text=A" alt="User Avatar" class="w-10 h-10 rounded-full border-2 border-[#C4751C]">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main App Container -->
+    <div id="app-container">
+        <!-- Home View -->
+        <div id="home-view">
+            <!-- Hero Section -->
+            <section id="hero-section" class="relative h-[60vh] md:h-[80vh] flex items-center justify-center text-white text-center overflow-hidden">
+                <video autoplay muted loop playsinline id="hero-video" poster="https://placehold.co/1920x1080/2C1310/fdf8f0?text=Loading..."><source src="https://www.pexels.com/download/video/3195650/" type="video/mp4">Your browser does not support the video tag.</video>
+                <div class="hero-overlay"></div>
+                <div class="relative z-10 p-4">
+                    <h2 class="text-5xl md:text-7xl font-extrabold mb-4 drop-shadow-lg">Discover Your Next Meal</h2>
+                    <p class="text-xl md:text-2xl mb-8 drop-shadow-md">Book tables at the finest restaurants in your Area.</p>
+                    <div class="mt-8 max-w-2xl mx-auto">
+                        <div class="relative">
+                            <input type="text" id="searchInput" placeholder="Search for restaurants, cuisines..." class="w-full pl-12 pr-4 py-4 bg-white/95 text-[#2C1310] border-2 border-transparent rounded-full focus:outline-none focus:ring-4 focus:ring-[#C4751C]/50 transition-shadow shadow-lg placeholder:text-gray-500">
+                            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-[#989382]" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Content Area -->
+            <main class="container mx-auto px-4 py-12 -mt-12 relative z-10">
+                <!-- Inspiration Section -->
+                <section id="inspiration-section" class="mb-16">
+                    <h3 class="text-3xl font-bold text-center text-[#2C1310] mb-8">Inspiration for your first order</h3>
+                    <div class="relative"><div id="inspiration-slider" class="inspiration-slider-container flex items-start gap-4 md:gap-8 overflow-x-scroll pb-4"></div><button id="slider-arrow-left" class="slider-arrow absolute top-1/2 -translate-y-1/2 -left-5 w-10 h-10 flex items-center justify-center text-gray-700 hidden md:flex"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg></button><button id="slider-arrow-right" class="slider-arrow absolute top-1/2 -translate-y-1/2 -right-5 w-10 h-10 flex items-center justify-center text-gray-700 hidden md:flex"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg></button></div>
+                </section>
+                
+                <!-- Restaurant Grid -->
+                <section id="restaurant-section">
+                    <h3 class="text-3xl font-bold text-center text-[#2C1310] mb-8">Top Restaurants in your Area</h3>
+                    <div id="restaurant-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+                    <p id="no-results" class="text-center text-xl text-[#989382] hidden mt-8">No restaurants found. Try a different search!</p>
+                </section>
+            </main>
+        </div>
+
+        <!-- Detail View -->
+        <div id="detail-view" class="hidden"></div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg hidden"><div id="modal-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg transform transition-all duration-300 scale-95 opacity-0"></div></div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 bg-[#2C1310] text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3 transform translate-y-20 opacity-0 transition-all duration-300"><svg id="toast-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-400"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><p id="toast-message">Success!</p></div>
+
+    <!-- Application JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- DOM ELEMENTS ---
+            const allDOMElements = {
+                header: document.getElementById('header'), homeLogo: document.getElementById('home-logo'),
+                searchInput: document.getElementById('searchInput'), restaurantGrid: document.getElementById('restaurant-grid'),
+                noResults: document.getElementById('no-results'), inspirationSlider: document.getElementById('inspiration-slider'),
+                sliderArrowLeft: document.getElementById('slider-arrow-left'), sliderArrowRight: document.getElementById('slider-arrow-right'),
+                homeView: document.getElementById('home-view'), detailView: document.getElementById('detail-view'),
+                modal: document.getElementById('modal'), modalContent: document.getElementById('modal-content'),
+                myReservationsBtn: document.getElementById('myReservationsBtn'), loginBtn: document.getElementById('login-btn'),
+                signupBtn: document.getElementById('signup-btn'),
+                toast: document.getElementById('toast'), toastMessage: document.getElementById('toast-message'),
+            };
+
+            // --- MOCK DATA ---
+            const restaurants = [
+                {
+                    id: 1, name: "The Gilded Spoon", cuisine: "Modern European", rating: 4.8, price: "₹1500 for Two",
+                    imageUrls: [ "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800&auto=format&fit=crop", "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=800&auto=format&fit=crop", "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?q=80&w=800&auto=format&fit=crop", ],
+                    description: "A chic, contemporary setting where culinary excellence meets locally-sourced ingredients. The Gilded Spoon offers a sophisticated ambiance perfect for fine dining, with occasional live music to enhance your experience.",
+                    openingHours: "5:00 PM - 11:00 PM",
+                    amenities: ['Live Music', 'Free Wi-Fi', 'Valet Parking', 'Fine Dining'],
+                    menu: { "Starters": [{ name: "Truffle Risotto", price: "₹850" }, { name: "Seared Scallops", price: "₹1100" }], "Main Course": [{ name: "Duck Confit", price: "₹1800" }, { name: "Filet Mignon", price: "₹2500" }], "Desserts": [{ name: "Chocolate Lava Cake", price: "₹650" }] },
+                    tags: ["Salad", "Pasta"]
+                },
+                {
+                    id: 2, name: "Urbane Flavors", cuisine: "Asian Fusion", rating: 4.6, price: "₹1200 for Two",
+                    imageUrls: [ "https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=800&auto=format&fit=crop", "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=800&auto=format&fit=crop", "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?q=80&w=800&auto=format&fit=crop", ],
+                    description: "Embark on a vibrant culinary journey through Asia. Our lively atmosphere, creative cocktails, and outdoor seating make it a perfect spot for a casual yet memorable meal. We specialize in fresh sushi and flavorful noodle dishes.",
+                    openingHours: "12:00 PM - 10:00 PM",
+                    amenities: ['Outdoor Seating', 'Free Wi-Fi', 'Happy Hour', 'Casual'],
+                    menu: { "Sushi Rolls": [{ name: "Spicy Tuna Roll", price: "₹700" }, { name: "Dragon Roll", price: "₹950" }], "Ramen": [{ name: "Tonkotsu Ramen", price: "₹1050" }, { name: "Miso Ramen", price: "₹1000" }] },
+                    tags: ["Noodles", "Momos"]
+                },
+                {
+                    id: 3, name: "La Terraza", cuisine: "Italian", rating: 4.9, price: "₹2100 for Two",
+                    imageUrls: [ "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=800&auto=format&fit=crop", "https://images.pexels.com/photos/15286713/pexels-photo-15286713.jpeg", "https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=800&auto=format&fit=crop", ],
+                    description: "Enjoy authentic Italian pastas and wood-fired pizzas on our stunning rooftop terrace. With a romantic ambiance and a curated list of imported wines, it's the ideal destination for a special evening.",
+                    openingHours: "1:00 PM - 11:30 PM",
+                    amenities: ['Rooftop View', 'Handmade Pasta', 'Imported Wines', 'Romantic'],
+                    menu: { "Pasta": [{ name: "Cacio e Pepe", price: "₹900" }, { name: "Lobster Ravioli", price: "₹1500" }], "Pizza": [{ name: "Margherita", price: "₹750" }, { name: "Prosciutto e Funghi", price: "₹950" }] },
+                    tags: ["Pizza", "Pasta"]
+                },
+                {
+                    id: 4, name: "The Spice Route", cuisine: "Indian", rating: 4.7, price: "₹2500 for Two",
+                    imageUrls: [ "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?q=80&w=800&auto=format&fit=crop", "https://images.pexels.com/photos/33899830/pexels-photo-33899830.jpeg", "https://images.pexels.com/photos/5779170/pexels-photo-5779170.jpeg", ],
+                    description: "Transport your senses to the streets of Mumbai with our aromatic and flavorful Indian cuisine. Our family-friendly environment and private dining options make it suitable for any occasion.",
+                    openingHours: "11:00 AM - 10:00 PM",
+                    amenities: ['Vegetarian Friendly', 'Tandoor Oven', 'Private Dining', 'Family Friendly'],
+                    menu: { "Curries": [{ name: "Butter Chicken", price: "₹650" }, { name: "Paneer Tikka Masala", price: "₹600" }], "Biryani": [{ name: "Chicken Dum Biryani", price: "₹750" }, { name: "Vegetable Biryani", price: "₹650" }] },
+                    tags: ["Biryani", "Paneer", "Thali"]
+                },
+                {
+                    id: 5, name: "Burger Barn", cuisine: "American", rating: 4.5, price: "₹799 for Two",
+                    imageUrls: [ "https://images.pexels.com/photos/11653555/pexels-photo-11653555.jpeg", "https://images.pexels.com/photos/33900971/pexels-photo-33900971.jpeg", "https://images.pexels.com/photos/2983101/pexels-photo-2983101.jpeg", ],
+                    description: "Home of the juiciest gourmet burgers in town. Our casual, rustic ambiance is perfect for a laid-back meal with friends. Don't forget to try our signature milkshakes and loaded fries!",
+                    openingHours: "11:00 AM - 11:00 PM",
+                    amenities: ['Casual', 'Outdoor Seating', 'Family Friendly'],
+                    menu: { "Burgers": [{ name: "Classic Cheeseburger", price: "₹450" }, { name: "Spicy Chicken Burger", price: "₹500" }], "Sides": [{ name: "Loaded Fries", price: "₹250" }, { name: "Onion Rings", price: "₹200" }] },
+                    tags: ["Burger"]
+                },
+                {
+                    id: 6, name: "Kathi Roll Express", cuisine: "Street Food", rating: 4.8, price: "₹399 for Two",
+                    imageUrls: [ "https://images.pexels.com/photos/5827618/pexels-photo-5827618.jpeg", "https://images.pexels.com/photos/6646369/pexels-photo-6646369.jpeg", "https://images.pexels.com/photos/5900509/pexels-photo-5900509.jpeg", ],
+                    description: "Quick, delicious, and packed with flavor. We serve the best Kathi Rolls in Chechat with a variety of fillings. A perfect grab-and-go meal with a vibrant, street-food-style atmosphere.",
+                    openingHours: "12:00 PM - 10:00 PM",
+                    amenities: ['Quick Bites', 'Vegetarian Options', 'Casual'],
+                    menu: { "Rolls": [{ name: "Chicken Tikka Roll", price: "₹250" }, { name: "Paneer Bhurji Roll", price: "₹220" }], "Momos": [{ name: "Steamed Chicken Momos", price: "₹180" }] },
+                    tags: ["Rolls", "Momos"]
+                },
+                {
+                    id: 7, name: "The Royal Thali", cuisine: "Indian Regional", rating: 4.9, price: "₹1800 for Two",
+                    imageUrls: [ "https://images.pexels.com/photos/8818667/pexels-photo-8818667.jpeg", "https://images.pexels.com/photos/29253334/pexels-photo-29253334.jpeg", "https://images.pexels.com/photos/14132112/pexels-photo-14132112.jpeg", ],
+                    description: "Experience the grandeur of Indian regional cuisine with our elaborate thalis. The ambiance reflects royal Indian heritage, providing an authentic and luxurious dining experience for the whole family.",
+                    openingHours: "12:00 PM - 3:00 PM, 7:00 PM - 11:00 PM",
+                    amenities: ['Authentic', 'Fine Dining', 'Family Friendly'],
+                    menu: { "Thali": [{ name: "Rajasthani Thali", price: "₹1200" }, { name: "Gujarati Thali", price: "₹1100" }] },
+                    tags: ["Thali", "Paneer"]
+                },
+                {
+                    id: 8, name: "Green Leaf Bistro", cuisine: "Healthy & Salads", rating: 4.6, price: "₹900 for Two",
+                    imageUrls: [ "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=800&auto=format&fit=crop", "https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=800&auto=format&fit=crop", "https://images.pexels.com/photos/1143754/pexels-photo-1143754.jpeg", ],
+                    description: "Fresh, healthy, and delicious. Our bistro offers a bright and refreshing ambiance, perfect for a wholesome lunch. We specialize in creative salads, fresh juices, and smoothie bowls.",
+                    openingHours: "10:00 AM - 9:00 PM",
+                    amenities: ['Healthy', 'Vegan Options', 'Free Wi-Fi', 'Casual'],
+                    menu: { "Salads": [{ name: "Quinoa Avocado Salad", price: "₹550" }, { name: "Greek Salad", price: "₹450" }], "Smoothies": [{ name: "Green Detox Smoothie", price: "₹300" }] },
+                    tags: ["Salad"]
+                },
+                 {
+                    id: 9, name: "Wok & Stir", cuisine: "Pan-Asian", rating: 4.7, price: "₹1100 for Two",
+                    imageUrls: [ "https://images.unsplash.com/photo-1585032226651-759b368d7246?q=80&w=800&auto=format&fit=crop", "https://images.pexels.com/photos/628776/pexels-photo-628776.jpeg", "https://images.pexels.com/photos/1422384/pexels-photo-1422384.jpeg", ],
+                    description: "Sizzling woks and authentic Pan-Asian flavors define our menu. The modern, fast-paced ambiance makes it a great spot for a quick and satisfying meal, from spicy noodles to delicate momos.",
+                    openingHours: "12:00 PM - 11:00 PM",
+                    amenities: ['Live Kitchen', 'Quick Bites', 'Spicy Options'],
+                    menu: { "Noodles": [{ name: "Pad Thai Noodles", price: "₹600" }, { name: "Chilli Garlic Noodles", price: "₹550" }], "Momos": [{ name: "Pan Fried Veg Momos", price: "₹350" }] },
+                    tags: ["Noodles", "Momos"]
+                }
+            ];
+            const inspirationData = [ { name: 'Pizza', imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400' }, { name: 'Biryani', imageUrl: 'https://images.pexels.com/photos/12737656/pexels-photo-12737656.jpeg' }, { name: 'Burger', imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400' }, { name: 'Paneer', imageUrl: 'https://images.pexels.com/photos/20258772/pexels-photo-20258772.jpeg' }, { name: 'Thali', imageUrl: 'https://images.pexels.com/photos/8148149/pexels-photo-8148149.jpeg' }, { name: 'Noodles', imageUrl: 'https://images.pexels.com/photos/1001773/pexels-photo-1001773.jpeg' }, { name: 'Rolls', imageUrl: 'https://images.pexels.com/photos/33430554/pexels-photo-33430554.jpeg' }, { name: 'Momos', imageUrl: 'https://images.pexels.com/photos/5409009/pexels-photo-5409009.jpeg' }, { name: 'Pasta', imageUrl: 'https://images.pexels.com/photos/803963/pexels-photo-803963.jpeg' }, { name: 'Salad', imageUrl: 'https://images.pexels.com/photos/1213710/pexels-photo-1213710.jpeg' } ];
+
+            // --- APP STATE ---
+            let reservations = [];
+            let state = { selectedDate: new Date(), selectedTime: null, selectedGuests: 2, currentImageIndex: 0 };
+
+            // --- RENDER FUNCTIONS ---
+            const renderRestaurants = (restaurantList) => {
+                allDOMElements.restaurantGrid.innerHTML = '';
+                allDOMElements.noResults.classList.toggle('hidden', restaurantList.length === 0);
+                restaurantList.forEach(r => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white rounded-2xl overflow-hidden shadow-lg transition-transform duration-300 hover:-translate-y-2 cursor-pointer';
+                    card.dataset.id = r.id;
+                    card.innerHTML = `<img src="${r.imageUrls[0]}" alt="${r.name}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/800x400/E1C99E/2C1310?text=Image+Not+Found';"><div class="p-5"><div class="flex justify-between items-start"><div><h3 class="text-xl font-bold text-[#2C1310]">${r.name}</h3><p class="text-[#989382]">${r.cuisine}</p></div><div class="flex items-center space-x-1 bg-[#E1C99E] text-[#932C04] px-2 py-1 rounded-md"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span class="font-bold">${r.rating}</span></div></div></div>`;
+                    card.addEventListener('click', () => showView('detail', r.id));
+                    allDOMElements.restaurantGrid.appendChild(card);
+                });
+            };
+            const renderInspiration = () => {
+                allDOMElements.inspirationSlider.innerHTML = inspirationData.map(item => `<div class="inspiration-item text-center cursor-pointer flex-shrink-0" data-filter="${item.name}"><img src="${item.imageUrl}" alt="${item.name}" class="mx-auto"><p class="mt-2 font-semibold">${item.name}</p></div>`).join('');
+                document.querySelectorAll('.inspiration-item').forEach(item => { item.addEventListener('click', handleInspirationClick); });
+            };
+            const renderDetailView = (restaurantId) => {
+                const restaurant = restaurants.find(r => r.id === restaurantId);
+                if (!restaurant) { console.error("Restaurant not found!"); return; }
+                state.currentImageIndex = 0;
+                allDOMElements.detailView.innerHTML = `<div class="container mx-auto px-4 py-8"><button id="back-to-home" class="inline-flex items-center gap-2 mb-6 text-[#932C04] font-semibold hover:underline"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>Back to all restaurants</button><div class="detail-image-slider rounded-2xl mb-6 shadow-lg"><div class="detail-image-wrapper">${restaurant.imageUrls.map(url => `<img src="${url}" alt="${restaurant.name}">`).join('')}</div><button class="detail-slider-arrow left"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg></button><button class="detail-slider-arrow right"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg></button></div><div class="text-left mb-6"><h2 class="text-4xl font-extrabold text-[#2C1310]">${restaurant.name}</h2><p class="text-lg text-[#989382] mt-1">${restaurant.cuisine} • ${restaurant.price}</p><p class="text-md text-[#2C1310] mt-3 max-w-3xl">${restaurant.description}</p><div class="flex items-center gap-2 mt-3"><span class="flex items-center space-x-1 bg-[#238041] text-white px-2 py-1 rounded-md text-sm font-bold"><span>${restaurant.rating}</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span><span class="text-[#989382]">341 Dining Ratings</span></div></div><div id="detail-tabs" class="flex items-center border-b-2 border-[#E1C99E] gap-8 mb-6 font-semibold text-lg text-[#989382]"><h3 data-tab="booking" class="detail-tab active">Book a Table</h3><h3 data-tab="menu" class="detail-tab">Menu</h3><h3 data-tab="info" class="detail-tab">Restaurant Info</h3></div><div id="tab-content"><div id="booking-content">${renderBookingForm()}</div><div id="menu-content" class="hidden">${Object.keys(restaurant.menu).map(category => `<div class="mb-6"><h4 class="text-2xl font-bold mb-4 text-[#932C04]">${category}</h4><div class="space-y-4">${restaurant.menu[category].map(item => `<div class="flex justify-between items-center pb-2 border-b border-dashed border-gray-200"><p class="font-semibold text-md">${item.name}</p><p class="font-semibold">${item.price}</p></div>`).join('')}</div></div>`).join('')}</div><div id="info-content" class="hidden"><h4 class="text-xl font-bold mb-3 text-[#932C04]">Opening Hours</h4><p class="mb-4">${restaurant.openingHours}</p><h4 class="text-xl font-bold mb-3 text-[#932C04]">Amenities</h4><div class="flex flex-wrap gap-3">${restaurant.amenities.map(amenity => `<span class="bg-[#E1C99E] text-[#932C04] px-3 py-1 rounded-full font-medium text-sm">${amenity}</span>`).join('')}</div></div></div></div>`;
+                addDetailViewEventListeners(restaurant);
+            };
+            const renderBookingForm = () => { const today = new Date(); today.setHours(0,0,0,0); return `<div class="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white p-6 rounded-lg shadow-md"><div><h3 class="text-xl font-semibold mb-3 text-[#932C04]">Select Date & Guests</h3><input type="date" id="date-picker" value="${state.selectedDate.toISOString().split('T')[0]}" min="${today.toISOString().split('T')[0]}" class="w-full p-2 border-2 border-[#E1C99E] rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-[#C4751C]"><div class="flex items-center space-x-4"><label class="font-medium">Guests:</label><div class="flex items-center space-x-2"><button id="guest-decrement" class="w-8 h-8 rounded-full border-2 border-[#C4751C] text-[#C4751C] font-bold">-</button><span id="guest-count" class="text-lg font-bold w-8 text-center">${state.selectedGuests}</span><button id="guest-increment" class="w-8 h-8 rounded-full border-2 border-[#C4751C] text-[#C4751C] font-bold">+</button></div></div></div><div><h3 class="text-xl font-semibold mb-3 text-[#932C04]">Choose a Time</h3><div id="time-slots-container" class="grid grid-cols-3 sm:grid-cols-4 gap-2">${generateTimeSlots()}</div></div></div><div class="mt-8 text-center"><button id="confirm-booking-btn" class="gradient-btn text-white font-bold py-3 px-12 rounded-lg text-lg w-full sm:w-auto" disabled>Confirm Reservation</button></div>`; };
+            const generateTimeSlots = () => { return Array.from({length: 12}, (_, i) => 17 + i * 0.5).map(hour => { const h = Math.floor(hour); const m = hour % 1 === 0 ? '00' : '30'; if (h > 22 && m === '30') return ''; const time = `${h}:${m}`; return `<button class="time-slot border-2 border-[#E1C99E] rounded-md py-2 px-4 transition-colors hover:bg-[#E1C99E]" data-time="${time}">${time}</button>`; }).join(''); };
+
+            // --- UI LOGIC & EVENT HANDLERS ---
+            const showView = (viewName, restaurantId = null) => {
+                window.scrollTo(0, 0);
+                if (viewName === 'home') {
+                    allDOMElements.homeView.classList.remove('hidden');
+                    allDOMElements.detailView.classList.add('hidden');
+                } else {
+                    renderDetailView(restaurantId);
+                    allDOMElements.homeView.classList.add('hidden');
+                    allDOMElements.detailView.classList.remove('hidden');
+                }
+            };
+            const handleScroll = () => allDOMElements.header.classList.toggle('scrolled', window.scrollY > 50);
+            const handleInspirationClick = (e) => { const filterTag = e.currentTarget.dataset.filter; const filtered = restaurants.filter(r => r.tags.includes(filterTag)); renderRestaurants(filtered); document.getElementById('restaurant-section').scrollIntoView({ behavior: 'smooth' }); };
+            const addDetailViewEventListeners = (restaurant) => {
+                document.getElementById('back-to-home').addEventListener('click', () => showView('home'));
+                const tabs = document.querySelectorAll('.detail-tab');
+                const tabContents = { menu: document.getElementById('menu-content'), booking: document.getElementById('booking-content'), info: document.getElementById('info-content'), };
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        tabs.forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        Object.values(tabContents).forEach(content => content.classList.add('hidden'));
+                        tabContents[tab.dataset.tab].classList.remove('hidden');
+                    });
+                });
+                if (tabContents.booking) {
+                    document.getElementById('date-picker').addEventListener('change', (e) => state.selectedDate = new Date(e.target.value));
+                    document.getElementById('guest-decrement').addEventListener('click', () => updateGuests(-1));
+                    document.getElementById('guest-increment').addEventListener('click', () => updateGuests(1));
+                    document.querySelectorAll('.time-slot').forEach(slot => slot.addEventListener('click', handleTimeSlotClick));
+                    document.getElementById('confirm-booking-btn').addEventListener('click', () => confirmBooking(restaurant));
+                }
+                const wrapper = document.querySelector('.detail-image-wrapper');
+                const totalImages = restaurant.imageUrls.length;
+                document.querySelector('.detail-slider-arrow.left').addEventListener('click', () => {
+                    state.currentImageIndex = (state.currentImageIndex > 0) ? state.currentImageIndex - 1 : totalImages - 1;
+                    wrapper.style.transform = `translateX(-${state.currentImageIndex * 100}%)`;
+                });
+                document.querySelector('.detail-slider-arrow.right').addEventListener('click', () => {
+                    state.currentImageIndex = (state.currentImageIndex < totalImages - 1) ? state.currentImageIndex + 1 : 0;
+                    wrapper.style.transform = `translateX(-${state.currentImageIndex * 100}%)`;
+                });
+            };
+            const updateGuests = (change) => { const newCount = state.selectedGuests + change; if (newCount >= 1 && newCount <= 10) { state.selectedGuests = newCount; document.getElementById('guest-count').textContent = state.selectedGuests; } };
+            const handleTimeSlotClick = (e) => { document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected')); e.target.classList.add('selected'); state.selectedTime = e.target.dataset.time; document.getElementById('confirm-booking-btn').disabled = false; };
+            const filterRestaurants = () => { const query = allDOMElements.searchInput.value.toLowerCase(); const filtered = restaurants.filter(r => r.name.toLowerCase().includes(query) || r.cuisine.toLowerCase().includes(query)); renderRestaurants(filtered); };
+            
+            const showToast = (message, isError = false) => {
+                allDOMElements.toastMessage.textContent = message;
+                const toastIcon = allDOMElements.toast.querySelector('svg');
+                toastIcon.classList.toggle('text-green-400', !isError);
+                toastIcon.classList.toggle('text-red-400', isError);
+                allDOMElements.toast.classList.remove('translate-y-20', 'opacity-0');
+                setTimeout(() => allDOMElements.toast.classList.add('translate-y-20', 'opacity-0'), 4000);
+            };
+
+            const confirmBooking = (restaurant) => {
+                const reservation = {
+                    id: Date.now(),
+                    restaurantName: restaurant.name, restaurantImg: restaurant.imageUrls[0],
+                    date: state.selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric' }),
+                    time: state.selectedTime, guests: state.selectedGuests
+                };
+                reservations.push(reservation);
+                showToast(`Booking confirmed at ${restaurant.name}!`);
+                const confirmBtn = document.getElementById('confirm-booking-btn');
+                if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.textContent = 'Booked!'; }
+            };
+            
+            // --- MODAL & AUTH LOGIC ---
+            const openModal = (contentHTML) => { allDOMElements.modalContent.innerHTML = contentHTML; allDOMElements.modal.classList.remove('hidden'); setTimeout(() => allDOMElements.modalContent.classList.remove('scale-95', 'opacity-0'), 10); document.getElementById('close-modal-btn').addEventListener('click', closeModal); };
+            const closeModal = () => { allDOMElements.modalContent.classList.add('scale-95', 'opacity-0'); setTimeout(() => allDOMElements.modal.classList.add('hidden'), 300); };
+            
+            const showReservations = () => {
+                const contentHTML = `
+                    <div class="p-8 max-h-[90vh] overflow-y-auto">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold text-[#2C1310]">My Reservations</h2>
+                            <button id="close-modal-btn" class="text-[#989382] hover:text-[#2C1310]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
+                        ${reservations.length === 0 
+                            ? '<p class="text-center text-[#989382] py-8">You have no upcoming reservations.</p>' 
+                            : `<div class="space-y-4">
+                                ${reservations.map(res => `
+                                    <div class="flex items-center bg-[#fdf8f0] p-4 rounded-lg border-2 border-[#E1C99E]">
+                                        <img src="${res.restaurantImg}" alt="${res.restaurantName}" class="w-20 h-20 rounded-md object-cover mr-4">
+                                        <div>
+                                            <h3 class="font-bold text-lg text-[#932C04]">${res.restaurantName}</h3>
+                                            <p class="text-sm text-[#2C1310]">${res.date} at ${res.time}</p>
+                                            <p class="text-sm text-[#989382]">${res.guests} guest(s)</p>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>`
+                        }
+                    </div>
+                `;
+                openModal(contentHTML);
+            };
+
+            const showAuthForm = (isLogin) => {
+                const title = isLogin ? 'Log in' : 'Sign Up';
+                const buttonText = isLogin ? 'Log in' : 'Create Account';
+                const nameField = isLogin ? '' : `<div><label for="name" class="block text-sm font-medium text-[#932C04]">Full Name</label><input type="text" id="auth-name" class="mt-1 block w-full px-3 py-2 border border-[#E1C99E] rounded-md shadow-sm focus:outline-none focus:ring-[#C4751C] focus:border-[#C4751C]"></div>`;
+                const contentHTML = `<div class="p-8"><div class="flex justify-between items-center mb-6"><h2 class="text-3xl font-bold text-[#2C1310]">${title}</h2><button id="close-modal-btn" class="text-[#989382] hover:text-[#2C1310]"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><form id="auth-form" class="space-y-4">${nameField}<div><label for="email" class="block text-sm font-medium text-[#932C04]">Email</label><input type="email" id="auth-email" class="mt-1 block w-full px-3 py-2 border border-[#E1C99E] rounded-md shadow-sm focus:outline-none focus:ring-[#C4751C] focus:border-[#C4751C]"></div><div><label for="password" class="block text-sm font-medium text-[#932C04]">Password</label><input type="password" id="auth-password" class="mt-1 block w-full px-3 py-2 border border-[#E1C99E] rounded-md shadow-sm focus:outline-none focus:ring-[#C4751C] focus:border-[#C4751C]"></div><button type="submit" class="w-full gradient-btn text-white font-bold py-2 px-4 rounded-lg">${buttonText}</button></form></div>`;
+                openModal(contentHTML);
+                document.getElementById('auth-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    showToast(`${isLogin ? 'Login' : 'Signup'} is for demonstration only.`);
+                    closeModal();
+                });
+            };
+            
+            // --- INITIAL SETUP ---
+            const init = () => {
+                renderRestaurants(restaurants);
+                renderInspiration();
+
+                window.addEventListener('scroll', handleScroll);
+                allDOMElements.searchInput.addEventListener('input', filterRestaurants);
+                allDOMElements.myReservationsBtn.addEventListener('click', showReservations);
+                allDOMElements.loginBtn.addEventListener('click', () => showAuthForm(true));
+                allDOMElements.signupBtn.addEventListener('click', () => showAuthForm(false));
+                allDOMElements.homeLogo.addEventListener('click', () => { renderRestaurants(restaurants); showView('home'); });
+                allDOMElements.modal.addEventListener('click', (e) => e.target === allDOMElements.modal && closeModal());
+                allDOMElements.sliderArrowLeft.addEventListener('click', () => allDOMElements.inspirationSlider.scrollBy({ left: -300, behavior: 'smooth'}));
+                allDOMElements.sliderArrowRight.addEventListener('click', () => allDOMElements.inspirationSlider.scrollBy({ left: 300, behavior: 'smooth'}));
+            };
+            
+            init();
+        });
+    </script>
+</body>
+</html>
+
